@@ -27,9 +27,11 @@ public class BT_Utils {
 				MiscUtils.createNBTTag(stk);
 				NBTTagCompound itemTag = stk.getTagCompound();
 				NBTTagCompound buffsTag = new NBTTagCompound();
+				String originalName = null;
 				if(itemTag.hasKey("BT_TagList"))
 				{
-					buffsTag = itemTag.getCompoundTag("BT_TagList");
+					originalName = itemTag.getString("BT_OriginalName");
+					itemTag.removeTag("BT_TagList");
 				}
 				BT_Effect effect = BT_EffectsLib.getRandomEffect(type);
 				List<DummyData> l = effect.getEffects();
@@ -41,12 +43,17 @@ public class BT_Utils {
 				String data = DataStorage.getDataString();
 				buffsTag.setString("BT_Buffs", data);
 				buffsTag.setString("BT_UUID", UUID.randomUUID().toString());
+				if(originalName == null || originalName.isEmpty())
+					itemTag.setString("BT_OriginalName", stk.getDisplayName());
 				NBTTagCompound display = new NBTTagCompound();
 				if(itemTag.hasKey("display"))
 				{
 					display = itemTag.getCompoundTag("display");
 				}
-				display.setString("Name", effect.getColor()+effect.getName()+" "+stk.getDisplayName());
+				if(originalName == null || originalName.isEmpty())
+					display.setString("Name", effect.getColor()+effect.getName()+" "+stk.getDisplayName());
+				else
+					display.setString("Name", effect.getColor()+effect.getName()+" "+originalName);
 				itemTag.setTag("display", display);
 				itemTag.setTag("BT_TagList", buffsTag);
 				stk.setTagCompound(itemTag);

@@ -5,25 +5,37 @@ import java.io.IOException;
 
 import DummyCore.Utils.DummyData;
 import DummyCore.Utils.EnumRarityColor;
+import DummyCore.Utils.MiscUtils;
+import net.minecraft.init.Blocks;
+import net.minecraft.item.ItemStack;
 import net.minecraft.server.MinecraftServer;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.oredict.OreDictionary;
+import net.minecraftforge.oredict.ShapedOreRecipe;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.Mod;
 import cpw.mods.fml.common.Mod.EventHandler;
+import cpw.mods.fml.common.SidedProxy;
 import cpw.mods.fml.common.event.FMLInitializationEvent;
+import cpw.mods.fml.common.event.FMLPostInitializationEvent;
 import cpw.mods.fml.common.event.FMLPreInitializationEvent;
 import cpw.mods.fml.common.event.FMLServerStartedEvent;
+import cpw.mods.fml.common.network.NetworkRegistry;
 import cpw.mods.fml.common.registry.GameRegistry;
 import cpw.mods.fml.relauncher.Side;
 
-@Mod(modid = "buffedtools",name = "Buffed Tools")
+@Mod(modid = "buffedtools",name = "Buffed Tools",version = "1.1.1710.1")
 public class BT_Mod {
 	
+	static BT_Mod instance;
 	File configDir;
 	BT_Config config;
+	@SidedProxy(serverSide="terraWorld.terraBuffs.BT_ServerProxy",clientSide="terraWorld.terraBuffs.BT_ClientProxy")
+	static BT_ServerProxy proxy;
 	@EventHandler
 	public void preinit(FMLPreInitializationEvent event)
 	{
+		instance = this;
 		configDir = event.getSuggestedConfigurationFile();
 		config = new BT_Config(configDir);
 		File file = new File(configDir.getAbsolutePath());
@@ -34,7 +46,16 @@ public class BT_Mod {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
+		proxy.preload();
+		NetworkRegistry.INSTANCE.registerGuiHandler(instance, proxy);
+		MinecraftForge.EVENT_BUS.register(new BT_EventHandler());
 	}
+	
+	public static BT_ServerProxy proxy()
+	{
+		return instance.proxy;
+	}
+	
 	
 	@EventHandler
 	public static void onServerStarted(FMLServerStartedEvent event)
@@ -53,7 +74,33 @@ public class BT_Mod {
 		registerEffects();
 		config.loadCFG();
 		
+		anvil = new BT_Anvil();
 	}
+	
+	@EventHandler
+	public void postInit(FMLPostInitializationEvent event)
+	{
+		if(MiscUtils.oreDictionaryContains("blockSteel"))
+			GameRegistry.addRecipe(new ShapedOreRecipe(anvil,new Object[]{
+					"ISI",
+					"BBB",
+					"III",
+					'I',"ingotIron",
+					'S',"blockSteel",
+					'B',new ItemStack(Blocks.iron_bars,1,OreDictionary.WILDCARD_VALUE)
+			}));
+		else
+			GameRegistry.addRecipe(new ShapedOreRecipe(anvil,new Object[]{
+					"ISI",
+					"BBB",
+					"III",
+					'I',"ingotIron",
+					'S',Blocks.anvil,
+					'B',new ItemStack(Blocks.iron_bars,1,OreDictionary.WILDCARD_VALUE)
+			}));
+	}
+	
+	public static BT_Anvil anvil;
 	
 	public void registerEffects()
 	{
