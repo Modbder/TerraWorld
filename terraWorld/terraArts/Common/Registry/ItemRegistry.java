@@ -2,7 +2,9 @@ package terraWorld.terraArts.Common.Registry;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Hashtable;
 
+import terraWorld.terraArts.API.CombineryRecipe;
 import terraWorld.terraArts.API.TAApi;
 import terraWorld.terraArts.Common.Item.ItemArtifact;
 import terraWorld.terraArts.Common.Item.ItemArtifact_Aglet;
@@ -49,6 +51,7 @@ import terraWorld.terraArts.Common.Item.ItemArtifact_Wings;
 import terraWorld.terraArts.Common.Item.ItemKey;
 import terraWorld.terraArts.Mod.TerraArts;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import DummyCore.Utils.EnumRarityColor;
 
 public class ItemRegistry {
@@ -97,7 +100,22 @@ public class ItemRegistry {
 		registerArtifact(ItemArtifact_PaladinsShield.class,"paladinsShield","Paladin's Shield","paladins_shield",4);
 		registerArtifact(ItemArtifact_MagmaStone.class,"magmaStone","Magmatic Stone","magma_stone",2);
 		registerArtifact(ItemArtifact_LuckyEmerald.class,"luckyEmerald","Lucky Emerald","lucky_emerald",3);
+		
+		addCombineryRecipe("sandstormInABottle","baloonRed","sandstormInABaloon",15);
+		addCombineryRecipe("blizzardInABottle","baloonRed","blizzardInABaloon",15);
+		addCombineryRecipe("cloudInABottle","baloonRed","cloudInABaloon",15);
+		addCombineryRecipe("obsidianSkull","luckyHorseshoe","obsidianHorseshoe",8);
+		addCombineryRecipe("starCloak","goldenCross","starVeil",23);
+		addCombineryRecipe("divingGear","jellyfishsNeclase","jellyfishsDG",12);
+		addCombineryRecipe("fluffyBoots","jellyfishsDG","ADG",30);
+		addCombineryRecipe("iceSkates","rocketBoots","fluffyBoots",18); 
+		addCombineryRecipe("ankh","obsidianShield","ankhShield",30); 
+		addCombineryRecipe("obsidianSkull","cobaltShield","obsidianShield",12); 
+		addCombineryRecipe("sunStone","moonStone","celestialStone",30); 
+		addCombineryRecipe("lavaAmulet","waterWalkers","lavaWalkers",15); 
 	}
+	
+	
 	
 	public static void registerArtifact(Class artifactClass, String codeName, String inGameName, String textureName, int rarity)
 	{
@@ -108,6 +126,7 @@ public class ItemRegistry {
 			DummyCore.Items.ItemRegistry.registerItem(art[artIndex], codeName, TerraArts.class);
 			TAApi.itemsNamesByID.add(codeName);
 			TAApi.itemsByNames.put(codeName, art[artIndex]);
+			arts.put(codeName, art[artIndex]);
 			if(TAApi.rarityLists[rarity] == null)
 				TAApi.rarityLists[rarity] = new ArrayList();
 			TAApi.rarityLists[rarity].add(art[artIndex]);
@@ -119,7 +138,19 @@ public class ItemRegistry {
 		}
 	}
 	
+	public static void addCombineryRecipe(String s, String s1, String result, int cost)
+	{
+		Item i_0 = arts.get(s);
+		Item i_1 = arts.get(s1);
+		Item res = arts.get(result);
+		if(i_0 != null && i_1 != null && res != null)
+		{
+			new CombineryRecipe(new ItemStack(i_0),new ItemStack(i_1),new ItemStack(res),cost);
+		}
+	}
+	
 	public static Item[] art = new Item[128];
+	public static Hashtable<String,Item> arts = new Hashtable();
 	public static Item key = new Item();
 	public static int artIndex = 0;
 }

@@ -22,6 +22,7 @@ import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.Container;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
@@ -53,10 +54,10 @@ public class BlockTAChest extends BlockContainer
         type = rarity;
     }
 
-    
-    public int idDropped(int par1, Random par2Random, int par3)
+    @Override
+    public Item getItemDropped(int p_149650_1_, Random p_149650_2_, int p_149650_3_)
     {
-        return 0;
+        return null;
     }
     /**
      * Called whenever the block is added into the world. Args: world, x, y, z
@@ -155,7 +156,6 @@ public class BlockTAChest extends BlockContainer
         	}
         	if(shouldOpen)
         	{
-        		System.out.println(FMLCommonHandler.instance().getEffectiveSide());
         		par5EntityPlayer.openGui(TerraArts.instance, 374436, par1World, par2, par3, par4);
         		TAPacketHandler.playSoundOnServer("random.door_close", par2+0.5D, par3+0.5D, par4+0.5D, 1, 0.2D, 16, par5EntityPlayer.dimension);
         	}
@@ -218,6 +218,7 @@ public class BlockTAChest extends BlockContainer
      */
     public void breakBlock(World par1World, int par2, int par3, int par4, Block par5, int par6)
     {
+    	System.out.println(par1World.isRemote);
     	ItemStack chestDropStack = new ItemStack(this,1,0);
     	NBTTagCompound dropTag = MiscUtils.getStackTag(chestDropStack);
     	TileEntityTAChest chest = (TileEntityTAChest) par1World.getTileEntity(par2, par3, par4);

@@ -4,10 +4,13 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 
 import terraWorld.terraArts.API.IArtifact;
+import terraWorld.terraArts.Client.GUI.GuiCombinery;
 import terraWorld.terraArts.Common.Inventory.ContainerArtifacts;
 import terraWorld.terraArts.Common.Inventory.ContainerChest;
+import terraWorld.terraArts.Common.Inventory.ContainerCombinery;
 import terraWorld.terraArts.Common.Inventory.InventoryArtifacts;
 import terraWorld.terraArts.Common.Tile.TileEntityTAChest;
+import terraWorld.terraArts.Common.Tile.TileEntityTACombiner;
 import terraWorld.terraArts.Mod.TerraArts;
 import terraWorld.terraArts.Network.TAPacketIMSG;
 import terraWorld.terraArts.Utils.TAUtils;
@@ -39,6 +42,10 @@ public class CommonProxy implements IGuiHandler{
 		if(tile instanceof TileEntityTAChest)
 		{
 			return new ContainerChest(player.inventory, (TileEntityTAChest) tile);
+		}
+		if(tile instanceof TileEntityTACombiner)
+		{
+			return new ContainerCombinery(player.inventory,tile);
 		}
 		return null;
 	}

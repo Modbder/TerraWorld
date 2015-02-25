@@ -1,7 +1,11 @@
 package terraWorld.terraArts.Utils;
 
+import DummyCore.Events.DummyEvent_OnClientGUIButtonPress;
+import terraWorld.terraArts.API.CombineryRecipe;
 import terraWorld.terraArts.API.IArtifact;
+import terraWorld.terraArts.API.TAApi;
 import terraWorld.terraArts.Common.Inventory.InventoryArtifacts;
+import terraWorld.terraArts.Common.Tile.TileEntityTACombiner;
 import terraWorld.terraArts.Mod.TerraArts;
 import terraWorld.terraArts.Network.TAPacketHandler;
 import cpw.mods.fml.common.eventhandler.EventPriority;
@@ -10,6 +14,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
@@ -17,6 +22,30 @@ import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 
 public class TAEventHandler {
+	
+	@SubscribeEvent
+	public void onClientPacketRecieved(DummyEvent_OnClientGUIButtonPress event)
+	{
+		if(event.client_ParentClassPath.equalsIgnoreCase("terraWorld.terraArts.Client.GUI.GuiCombinery"))
+		{
+			TileEntity tile = event.presser.worldObj.getTileEntity(event.x, event.y, event.z);
+			if(tile != null && tile instanceof TileEntityTACombiner)
+			{
+				TileEntityTACombiner anvil = (TileEntityTACombiner) tile;
+				CombineryRecipe rec = TAApi.getRecipeByCP(anvil.getStackInSlot(0), anvil.getStackInSlot(1));
+				if(rec != null)
+				{
+					anvil.setInventorySlotContents(0, null);
+					anvil.setInventorySlotContents(1, null);
+					anvil.setInventorySlotContents(2, rec.result.copy());
+					anvil.markDirty();
+					int cost = Integer.parseInt(event.additionalData[0].fieldValue);
+					if(!event.presser.capabilities.isCreativeMode)
+						event.presser.experienceLevel -= cost;
+				}
+			}
+		}
+	}
 	
 	@SubscribeEvent(priority = EventPriority.HIGH)
 	public void event_hurt(LivingHurtEvent event)

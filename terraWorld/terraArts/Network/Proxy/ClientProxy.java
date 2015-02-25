@@ -6,8 +6,11 @@ import java.io.DataInputStream;
 import org.lwjgl.input.Keyboard;
 
 import terraWorld.terraArts.Client.GUI.GuiArtifacts;
+import terraWorld.terraArts.Client.GUI.GuiCombinery;
 import terraWorld.terraArts.Common.Entity.EntityFallingStar;
+import terraWorld.terraArts.Common.Inventory.ContainerCombinery;
 import terraWorld.terraArts.Common.Tile.TileEntityTAChest;
+import terraWorld.terraArts.Common.Tile.TileEntityTACombiner;
 import terraWorld.terraArts.Network.TAPacketIMSG;
 import terraWorld.terraArts.Utils.TAClientTickHandler;
 import terraWorld.terraArts.Utils.TAUtils;
@@ -50,6 +53,10 @@ public class ClientProxy extends CommonProxy{
 		if(tile instanceof TileEntityTAChest)
 		{
 			return new GuiChest(player.inventory, (TileEntityTAChest) tile);
+		}
+		if(tile instanceof TileEntityTACombiner)
+		{
+			return new GuiCombinery(new ContainerCombinery(player.inventory,tile),tile);
 		}
 		return super.getClientGuiElement(ID, player, world, x, y, z);
 	}

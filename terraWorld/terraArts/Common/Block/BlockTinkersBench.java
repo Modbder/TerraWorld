@@ -6,6 +6,8 @@ import cpw.mods.fml.relauncher.SideOnly;
 
 import java.util.Random;
 
+import terraWorld.terraArts.Common.Tile.TileEntityTACombiner;
+import terraWorld.terraArts.Mod.TerraArts;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
@@ -63,13 +65,14 @@ public class BlockTinkersBench extends BlockContainer
         }
         else
         {
-            return true;
+        	par5EntityPlayer.openGui(TerraArts.instance, 374436, par1World, par2, par3, par4);
+        	return true;
         }
     }
 
     public TileEntity createNewTileEntity(World par1World)
     {
-        return null;
+        return new TileEntityTACombiner();
     }
 
     /**
