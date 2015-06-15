@@ -7,8 +7,11 @@ import org.lwjgl.input.Keyboard;
 
 import terraWorld.terraArts.Client.GUI.GuiArtifacts;
 import terraWorld.terraArts.Client.GUI.GuiCombinery;
+import terraWorld.terraArts.Client.Render.ChestRenderer;
+import terraWorld.terraArts.Client.Render.ItemChestRenderer;
 import terraWorld.terraArts.Common.Entity.EntityFallingStar;
 import terraWorld.terraArts.Common.Inventory.ContainerCombinery;
+import terraWorld.terraArts.Common.Registry.BlockRegistry;
 import terraWorld.terraArts.Common.Tile.TileEntityTAChest;
 import terraWorld.terraArts.Common.Tile.TileEntityTACombiner;
 import terraWorld.terraArts.Network.TAPacketIMSG;
@@ -17,6 +20,7 @@ import terraWorld.terraArts.Utils.TAUtils;
 import DummyCore.Utils.DataStorage;
 import DummyCore.Utils.DummyData;
 import DummyCore.Utils.MiscUtils;
+import cpw.mods.fml.client.FMLClientHandler;
 import cpw.mods.fml.client.registry.ClientRegistry;
 import cpw.mods.fml.client.registry.RenderingRegistry;
 import cpw.mods.fml.common.FMLCommonHandler;
@@ -35,6 +39,7 @@ import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
+import net.minecraftforge.client.MinecraftForgeClient;
 
 @SideOnly(Side.CLIENT)
 public class ClientProxy extends CommonProxy{
@@ -71,6 +76,12 @@ public class ClientProxy extends CommonProxy{
 		ClientRegistry.registerKeyBinding(kbOpenGUI);
     	boolean[] repeat = {false};
 		VillagerRegistry.instance().registerVillagerSkin(8,new ResourceLocation("terraarts","textures/entity/YE3TE2y.png"));
+		RenderingRegistry.registerBlockHandler(new ChestRenderer());
+		MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(BlockRegistry.chests[0]), new ItemChestRenderer());
+		MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(BlockRegistry.chests[1]), new ItemChestRenderer());
+		MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(BlockRegistry.chests[2]), new ItemChestRenderer());
+		MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(BlockRegistry.chests[3]), new ItemChestRenderer());
+		MinecraftForgeClient.registerItemRenderer(Item.getItemFromBlock(BlockRegistry.chests[4]), new ItemChestRenderer());
 	}
 	
 	@Override

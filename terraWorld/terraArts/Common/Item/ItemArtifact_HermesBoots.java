@@ -35,15 +35,15 @@ public class ItemArtifact_HermesBoots extends ItemArtifact{
 		if(par1ItemStack != null)
 		{
 			NBTTagCompound tag = MiscUtils.getStackTag(par1ItemStack);
-			if(!tag.hasKey("data"))
+			if(!tag.hasKey("TAdata"))
 			{
-				tag.setString("data", "||sprint:0");
+				tag.setString("TAdata", "||sprint:0");
 			}
-			String dataString = tag.getString("data");
+			String dataString = tag.getString("TAdata");
 			DummyData[] dat = DataStorage.parseData(dataString);
 			if(dat.length > 0)
 			{
-				int jumped = Integer.parseInt(dat[0].fieldValue);
+				int jumped = (int)Double.parseDouble(dat[0].fieldValue);
 				if(jumped > 50)
 				{
 					if(!p.isSprinting())
@@ -68,7 +68,7 @@ public class ItemArtifact_HermesBoots extends ItemArtifact{
 					TAUtils.applySpeedModifier(p, getSpeedModifierName(par1ItemStack), getSpeedModifierValue(par1ItemStack), true);
 				}
 				DummyData jDat = new DummyData("sprint",jumped);
-				tag.setString("data", jDat.toString());
+				tag.setString("TAdata", jDat.toString());
 				par1ItemStack.setTagCompound(tag);
 			}
 		}

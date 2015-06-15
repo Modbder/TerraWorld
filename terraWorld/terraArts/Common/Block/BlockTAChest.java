@@ -1,9 +1,7 @@
 package terraWorld.terraArts.Common.Block;
 
-import DummyCore.Core.CoreInitialiser;
 import DummyCore.Utils.MathUtils;
 import DummyCore.Utils.MiscUtils;
-import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.relauncher.Side;
 import cpw.mods.fml.relauncher.SideOnly;
 
@@ -13,6 +11,8 @@ import terraWorld.terraArts.Common.Registry.ItemRegistry;
 import terraWorld.terraArts.Common.Tile.TileEntityTAChest;
 import terraWorld.terraArts.Mod.TerraArts;
 import terraWorld.terraArts.Network.TAPacketHandler;
+import terraWorld.terraArts.Utils.EnumOverlay;
+import terraWorld.terraArts.Utils.TAConfig;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockContainer;
 import net.minecraft.block.material.Material;
@@ -20,13 +20,10 @@ import net.minecraft.client.renderer.texture.IIconRegister;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.entity.item.EntityItem;
 import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.inventory.Container;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityFurnace;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.IIcon;
 import net.minecraft.util.MathHelper;
@@ -36,17 +33,12 @@ public class BlockTAChest extends BlockContainer
 {
 	public static String[] names = {"Iron","Gold","Diamond","Gem","Darkness"};
 	public int type;
-    /**
-     * Is the random generator used by furnace to drop the inventory contents in random directions.
-     */
-    private final Random furnaceRand = new Random();
-
-    /** True if this is an active furnace, false if idle */
-    private boolean isActive = false;
     @SideOnly(Side.CLIENT)
     private IIcon furnaceIconTop;
     @SideOnly(Side.CLIENT)
     private IIcon furnaceIconFront;
+    
+    public IIcon[] allOverlays = new IIcon[128];
 
     public BlockTAChest(int rarity)
     {
@@ -54,6 +46,16 @@ public class BlockTAChest extends BlockContainer
         type = rarity;
     }
 
+    public boolean renderAsNormalBlock()
+    {
+        return false;
+    }
+    
+    public int getRenderType()
+    {
+    	return TAConfig.chestRendererID;
+    }
+    
     @Override
     public Item getItemDropped(int p_149650_1_, Random p_149650_2_, int p_149650_3_)
     {
@@ -107,27 +109,16 @@ public class BlockTAChest extends BlockContainer
     }
 
     @SideOnly(Side.CLIENT)
-
-    /**
-     * From the specified side and block metadata retrieves the blocks texture. Args: side, metadata
-     */
-    public IIcon getIcon(int par1, int par2)
-    {
-        return par1 == 1 ? this.furnaceIconTop : (par1 == 0 ? this.furnaceIconTop : (par1 != par2 ? this.blockIcon : this.furnaceIconFront));
-    }
-
-    @SideOnly(Side.CLIENT)
-
-    /**
-     * When this method is called, your block should register all the icons it needs with the given IconRegister. This
-     * is the only chance you get to register icons.
-     */
     @Override
     public void registerBlockIcons(IIconRegister par1IconRegister)
     {
-        this.blockIcon = par1IconRegister.registerIcon("terraarts:chestAnySide");
-        this.furnaceIconFront = par1IconRegister.registerIcon(this.isActive ? "terraarts:chest"+names[this.type]+"Lock" : "terraarts:chest"+names[this.type]+"Lock");
-        this.furnaceIconTop = par1IconRegister.registerIcon("terraarts:chestTop");
+    	this.allOverlays[0] = par1IconRegister.registerIcon("terraarts:chestoverlay_generic");
+    	this.allOverlays[1] = par1IconRegister.registerIcon("terraarts:chestoverlay_side");
+    	this.allOverlays[2] = par1IconRegister.registerIcon("terraarts:chestoverlay_lock");
+    	for(int i = 3; i < EnumOverlay.values().length + 3; ++i)
+    	{
+    		this.allOverlays[i] = par1IconRegister.registerIcon("terraarts:chestoverlay_"+EnumOverlay.values()[i-3].getName());
+    	}
     }
 
     /**
@@ -141,6 +132,7 @@ public class BlockTAChest extends BlockContainer
         }
         else
         {
+        	TileEntityTAChest chest = (TileEntityTAChest) par1World.getTileEntity(par2, par3, par4);
         	boolean shouldOpen = false;
         	//TODO keys
         	ItemStack heldStack = par5EntityPlayer.getCurrentEquippedItem();
@@ -154,8 +146,19 @@ public class BlockTAChest extends BlockContainer
         			}
         		}
         	}
-        	if(shouldOpen)
+        	if((shouldOpen || !TAConfig.chestsRequireKeys) || (chest != null && chest.unlocked && TAConfig.saveChestInformation))
         	{
+        		if(TAConfig.saveChestInformation)
+        		{
+        			chest.unlocked = true;
+        			TAPacketHandler.playSoundOnServer("random.levelup", par2+0.5D, par3+0.5D, par4+0.5D, 1, 2, 16, par5EntityPlayer.dimension);
+        			chest.onPlaced();
+        			if(TAConfig.chestsConsumeKeys && heldStack != null && heldStack.getItem() == ItemRegistry.key)
+        			{
+        				par5EntityPlayer.inventory.decrStackSize(par5EntityPlayer.inventory.currentItem, 1);
+        				TAPacketHandler.playSoundOnServer("random.break", par2+0.5D, par3+0.5D, par4+0.5D, 1, 1, 16, par5EntityPlayer.dimension);
+        			}
+        		}
         		par5EntityPlayer.openGui(TerraArts.instance, 374436, par1World, par2, par3, par4);
         		TAPacketHandler.playSoundOnServer("random.door_close", par2+0.5D, par3+0.5D, par4+0.5D, 1, 0.2D, 16, par5EntityPlayer.dimension);
         	}
@@ -209,6 +212,7 @@ public class BlockTAChest extends BlockContainer
         chest.xCoord = par2;
         chest.yCoord = par3;
         chest.zCoord = par4;
+        chest.onPlaced();
     }
 
     /**
@@ -218,20 +222,22 @@ public class BlockTAChest extends BlockContainer
      */
     public void breakBlock(World par1World, int par2, int par3, int par4, Block par5, int par6)
     {
-    	System.out.println(par1World.isRemote);
     	ItemStack chestDropStack = new ItemStack(this,1,0);
     	NBTTagCompound dropTag = MiscUtils.getStackTag(chestDropStack);
     	TileEntityTAChest chest = (TileEntityTAChest) par1World.getTileEntity(par2, par3, par4);
-    	chest.writeToNBT(dropTag);
-    	chestDropStack.setTagCompound(dropTag);
-    	EntityItem chestItem = new EntityItem(par1World,par2+0.5D,par3+0.5D,par4+0.5D,chestDropStack);
-    	chestItem.setPositionAndRotation(par2+0.5D,par3+0.5D,par4+0.5D, 1, 1);
-    	chestItem.motionX += MathUtils.randomDouble(par1World.rand);
-    	chestItem.motionY += MathUtils.randomDouble(par1World.rand);
-    	chestItem.motionZ += MathUtils.randomDouble(par1World.rand);
-    	if(!par1World.isRemote)
-    		par1World.spawnEntityInWorld(chestItem);
-    	TAPacketHandler.playSoundOnServer("fireworks.blast", par2+0.5D, par3+0.5D, par4+0.5D, 1, 0.1D, 16, par1World.provider.dimensionId);
+    	if(chest != null)
+    	{
+	    	chest.writeToNBT(dropTag);
+	    	chestDropStack.setTagCompound(dropTag);
+	    	EntityItem chestItem = new EntityItem(par1World,par2+0.5D,par3+0.5D,par4+0.5D,chestDropStack);
+	    	chestItem.setPositionAndRotation(par2+0.5D,par3+0.5D,par4+0.5D, 1, 1);
+	    	chestItem.motionX += MathUtils.randomDouble(par1World.rand)/3;
+	    	chestItem.motionY += MathUtils.randomDouble(par1World.rand)/3;
+	    	chestItem.motionZ += MathUtils.randomDouble(par1World.rand)/3;
+	    	if(!par1World.isRemote)
+	    		par1World.spawnEntityInWorld(chestItem);
+	    	TAPacketHandler.playSoundOnServer("fireworks.blast", par2+0.5D, par3+0.5D, par4+0.5D, 1, 0.1D, 16, par1World.provider.dimensionId);
+    	}
         super.breakBlock(par1World, par2, par3, par4, par5, par6);
     }
 

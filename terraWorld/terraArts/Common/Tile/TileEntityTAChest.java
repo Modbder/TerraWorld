@@ -1,16 +1,31 @@
 package terraWorld.terraArts.Common.Tile;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 
+import cpw.mods.fml.common.Loader;
+import terraWorld.terraArts.Utils.EnumOverlay;
+import DummyCore.Utils.MiscUtils;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.network.NetworkManager;
+import net.minecraft.network.play.server.S35PacketUpdateTileEntity;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.WorldProvider;
+import net.minecraft.world.biome.BiomeGenBase;
+import net.minecraftforge.common.BiomeDictionary;
+import net.minecraftforge.common.BiomeDictionary.Type;
 
 public class TileEntityTAChest extends TileEntity implements IInventory
 {
+	public int textureIndex = -1;
+	public int rarity = -1;//Not used for now
+	public boolean unlocked = false;
+	
     private ItemStack[] dispenserContents = new ItemStack[9];
 
     /**
@@ -19,6 +34,90 @@ public class TileEntityTAChest extends TileEntity implements IInventory
     private Random dispenserRandom = new Random();
     protected String customName;
 
+    public void initChest()
+    {
+    	int x = this.xCoord;
+    	int y = this.yCoord;
+    	int z = this.zCoord;
+    	BiomeGenBase b = this.worldObj.getBiomeGenForCoords(x, z);
+    	b.getFloatTemperature(x, y, z);
+    	WorldProvider p = this.worldObj.provider;
+    	if(p != null)
+    	{
+    		boolean hellWorld = p.isHellWorld;
+    		BiomeDictionary.Type[] t = BiomeDictionary.getTypesForBiome(b);
+    		List<BiomeDictionary.Type> tp = Arrays.asList(t);
+    		
+    		if(Loader.isModLoaded("Thaumcraft"))
+    		{
+    			try
+    			{
+    				Class<?> fake = Class.forName("thaumcraft.common.lib.world.dim.WorldProviderOuter");
+    				if(p.getClass().equals(fake))
+    				{
+    	    			this.textureIndex = EnumOverlay.ELDRITCH.getID();
+    	    			return;
+    				}
+    			}
+    			catch(Exception e)
+    			{
+    				//Silent error catching
+    			}
+    		}
+    		
+    		if(p.dimensionId == 1)
+    		{
+    			this.textureIndex = EnumOverlay.END.getID();
+    			return;
+    		}
+    		
+    		if(hellWorld)
+    		{
+    			this.textureIndex = EnumOverlay.HELL.getID();
+    			return;
+    		}
+    		
+    		if(tp.contains(Type.SANDY))
+    		{
+    			this.textureIndex = EnumOverlay.SURFACE_DESERT.getID();
+    			return;
+    		}
+    		
+    		if(tp.contains(Type.SWAMP))
+    		{
+    			this.textureIndex = EnumOverlay.SURFACE_SWAMP.getID();
+    			return;
+    		}
+    		
+    		if(y > p.getAverageGroundLevel())
+    		{
+    			if(tp.contains(Type.JUNGLE))
+    			{
+        			this.textureIndex = EnumOverlay.SURFACE_JUNGLE.getID();
+        			return;
+    			}
+    			this.textureIndex = EnumOverlay.SURFACE_GENERIC.getID();
+    			return;
+    			
+    		}else
+    		{
+    			if(tp.contains(Type.JUNGLE))
+    			{
+        			this.textureIndex = EnumOverlay.UNDERGROUND_JUNGLE.getID();
+        			return;
+    			}
+    			if(tp.contains(Type.COLD))
+    			{
+        			this.textureIndex = EnumOverlay.UNDERGROUND_COLD.getID();
+        			return;
+    			}
+    			this.textureIndex = EnumOverlay.UNDERGROUND_GENERIC.getID();
+    			return;
+    		}
+    		
+    	}
+    }
+    
     /**
      * Returns the number of slots in the inventory.
      */
@@ -145,6 +244,14 @@ public class TileEntityTAChest extends TileEntity implements IInventory
         return "Chest";
     }
 
+    public boolean onPlaced()
+    {
+    	NBTTagCompound tag = new NBTTagCompound();
+    	this.writeToNBT(tag);
+    	MiscUtils.syncTileEntity(tag, -10);
+    	return true;
+    }
+    		
     public void setCustomName(String par1Str)
     {
         this.customName = par1Str;
@@ -167,7 +274,11 @@ public class TileEntityTAChest extends TileEntity implements IInventory
         super.readFromNBT(par1NBTTagCompound);
         NBTTagList nbttaglist = par1NBTTagCompound.getTagList("Items",10);
         this.dispenserContents = new ItemStack[this.getSizeInventory()];
-
+        
+        this.rarity = par1NBTTagCompound.getInteger("rarity");
+        this.textureIndex = par1NBTTagCompound.getInteger("textureIndex");
+        this.unlocked = par1NBTTagCompound.getBoolean("unlocked");
+        
         for (int i = 0; i < nbttaglist.tagCount(); ++i)
         {
             NBTTagCompound nbttagcompound1 = (NBTTagCompound)nbttaglist.getCompoundTagAt(i);
@@ -193,6 +304,10 @@ public class TileEntityTAChest extends TileEntity implements IInventory
         super.writeToNBT(par1NBTTagCompound);
         NBTTagList nbttaglist = new NBTTagList();
 
+        par1NBTTagCompound.setInteger("rarity", this.rarity);
+        par1NBTTagCompound.setInteger("textureIndex", this.textureIndex);
+        par1NBTTagCompound.setBoolean("unlocked", this.unlocked);
+        
         for (int i = 0; i < this.dispenserContents.length; ++i)
         {
             if (this.dispenserContents[i] != null)
@@ -264,4 +379,11 @@ public class TileEntityTAChest extends TileEntity implements IInventory
 		// TODO Auto-generated method stub
 		
 	}
+	
+    public void onDataPacket(NetworkManager net, S35PacketUpdateTileEntity pkt)
+    {
+    	this.readFromNBT(pkt.func_148857_g());
+    	this.worldObj.markBlockRangeForRenderUpdate(xCoord-3, yCoord-3, zCoord-3, xCoord+3, yCoord+3, zCoord+3);
+    }
+
 }

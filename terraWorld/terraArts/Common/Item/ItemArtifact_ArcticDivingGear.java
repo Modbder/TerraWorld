@@ -46,7 +46,7 @@ public class ItemArtifact_ArcticDivingGear extends ItemArtifact{
 		}else
 		{
 		}
-		Block b = MiscUtils.getBlock(p.worldObj, (int)p.posX, (int)p.posY-1, (int)p.posZ);
+		Block b = p.worldObj.getBlock((int)p.posX, (int)p.posY-1, (int)p.posZ);
 		if(b != null && b instanceof BlockIce)
 		{
 			TAUtils.applySpeedModifier(p, getSpeedModifierName(par1ItemStack), getSpeedModifierValue(par1ItemStack), false);

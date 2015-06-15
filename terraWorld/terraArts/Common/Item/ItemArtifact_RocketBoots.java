@@ -22,15 +22,15 @@ public class ItemArtifact_RocketBoots extends ItemArtifact{
 		if(par1ItemStack != null)
 		{
 			NBTTagCompound tag = MiscUtils.getStackTag(par1ItemStack);
-			if(!tag.hasKey("data"))
+			if(!tag.hasKey("TAdata"))
 			{
-				tag.setString("data", "||jump:100");
+				tag.setString("TAdata", "||jump:100");
 			}
-			String dataString = tag.getString("data");
+			String dataString = tag.getString("TAdata");
 			DummyData[] dat = DataStorage.parseData(dataString);
 			if(dat.length > 0)
 			{
-				int jumped = Integer.parseInt(dat[0].fieldValue);
+				int jumped = (int)Double.parseDouble(dat[0].fieldValue);
 				if(jumped > 0)
 				{
 					p.motionY += 0.08F;
@@ -44,7 +44,7 @@ public class ItemArtifact_RocketBoots extends ItemArtifact{
 				ret = jumped > 0 && !p.onGround;
 				
 				DummyData jDat = new DummyData("jump",jumped);
-					tag.setString("data", jDat.toString());
+					tag.setString("TAdata", jDat.toString());
 					par1ItemStack.setTagCompound(tag);
 			}
 		}
@@ -56,19 +56,19 @@ public class ItemArtifact_RocketBoots extends ItemArtifact{
 		if(par1ItemStack != null)
 		{
 			NBTTagCompound tag = MiscUtils.getStackTag(par1ItemStack);
-			if(!tag.hasKey("data"))
+			if(!tag.hasKey("TAdata"))
 			{
-				tag.setString("data", "||jump:100");
+				tag.setString("TAdata", "||jump:100");
 			}
-			String dataString = tag.getString("data");
+			String dataString = tag.getString("TAdata");
 			DummyData[] dat = DataStorage.parseData(dataString);
 			if(dat.length > 0)
 			{
-				int jumped = Integer.parseInt(dat[0].fieldValue);
+				int jumped = (int)Double.parseDouble(dat[0].fieldValue);
 				if(p.onGround)
 					jumped = (int) (1.6*20);
 				DummyData jDat = new DummyData("jump",jumped);
-				tag.setString("data", jDat.toString());
+				tag.setString("TAdata", jDat.toString());
 				par1ItemStack.setTagCompound(tag);
 			}
 		}

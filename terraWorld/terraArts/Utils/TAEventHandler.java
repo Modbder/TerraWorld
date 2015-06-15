@@ -119,7 +119,7 @@ public class TAEventHandler {
 	public void event_jump(LivingJumpEvent event)
 	{
 		Entity base = event.entity;
-		if(base instanceof EntityPlayer)
+		if(base instanceof EntityPlayer && base.worldObj.isRemote)
 		{
 			EntityPlayer p = (EntityPlayer) base;
 			TerraArts.network.sendToServer(TAPacketHandler.getPacketFor("TA.Jump", "||username:"+p.getCommandSenderName()));

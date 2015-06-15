@@ -32,7 +32,7 @@ public class BT_Handler{
 	public void onCrafting(ItemCraftedEvent event) {
 		EntityPlayer player = event.player;
 		ItemStack item = event.crafting;
-		if(!player.worldObj.isRemote)
+		if(!player.worldObj.isRemote && item != null)
 		{
 			BT_Utils.addRandomEffects(item);
 		}

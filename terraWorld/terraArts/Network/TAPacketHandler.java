@@ -1,5 +1,7 @@
 package terraWorld.terraArts.Network;
 
+import io.netty.channel.ChannelHandler;
+
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -22,7 +24,7 @@ import cpw.mods.fml.common.network.simpleimpl.IMessage;
 import cpw.mods.fml.common.network.simpleimpl.IMessageHandler;
 import cpw.mods.fml.common.network.simpleimpl.MessageContext;
 import cpw.mods.fml.relauncher.Side;
-
+@ChannelHandler.Sharable
 public class TAPacketHandler implements IMessageHandler<TAPacketIMSG, IMessage>{
 
 
@@ -80,6 +82,22 @@ public class TAPacketHandler implements IMessageHandler<TAPacketIMSG, IMessage>{
 			DataStorage.addDataToString(datArray[i]);
 		}
 		TerraArts.network.sendTo(getPacketFor("TA.Move",DataStorage.getDataString()),(EntityPlayerMP) e);
+	}
+	
+	public static void sendRenderRequestToServer(double x, double y, double z, int dimension, EntityPlayer p, int currentRenderID)
+	{
+		DummyData[] datArray = new DummyData[6];
+		datArray[0] = new DummyData("x",x);
+		datArray[1] = new DummyData("y",y);
+		datArray[2] = new DummyData("z",z);
+		datArray[3] = new DummyData("dim",dimension);
+		datArray[4] = new DummyData("username",p.getCommandSenderName());
+		datArray[5] = new DummyData("render",currentRenderID);
+		for(int i = 0; i < 6; ++i)
+		{
+			DataStorage.addDataToString(datArray[i]);
+		}
+		TerraArts.network.sendToServer(getPacketFor("TA.RenderRequest",DataStorage.getDataString()));
 	}
 	
 	public static TAPacketIMSG getPacketFor(String packetName, String packetData)

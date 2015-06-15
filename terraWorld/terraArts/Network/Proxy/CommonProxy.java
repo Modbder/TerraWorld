@@ -24,6 +24,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ChatComponentText;
 import net.minecraft.world.World;
 import cpw.mods.fml.common.FMLCommonHandler;
 import cpw.mods.fml.common.network.IGuiHandler;
@@ -75,6 +76,33 @@ public class CommonProxy implements IGuiHandler{
 					String username = dat[0].fieldValue;
 					EntityPlayer pl = MinecraftServer.getServer().getConfigurationManager().func_152612_a(username);
 					pl.openGui(TerraArts.instance, 374435, pl.worldObj, 0, 0, 0);
+				}
+			}
+			if(packet.packetType.equals("TA.RenderRequest"))
+			{
+			
+				String data = packet.dummyData;
+				DummyData[] dat = DataStorage.parseData(data);
+				if(dat.length != 0)
+				{
+					double x = Double.parseDouble(dat[0].fieldValue);
+					double y = Double.parseDouble(dat[1].fieldValue);
+					double z = Double.parseDouble(dat[2].fieldValue);
+					int dim = Integer.parseInt(dat[3].fieldValue);
+					String username = dat[4].fieldValue;
+					int render = Integer.parseInt(dat[5].fieldValue);
+					EntityPlayer pl = MinecraftServer.getServer().getConfigurationManager().func_152612_a(username);
+					World w = MinecraftServer.getServer().worldServerForDimension(dim);
+					if(w != null)
+					{
+						TileEntity t = w.getTileEntity((int)x, (int)y, (int)z);
+						if(t != null && t instanceof TileEntityTAChest)
+						{
+							TileEntityTAChest chest = (TileEntityTAChest) t;
+							if(render != chest.textureIndex)
+								chest.onPlaced();
+						}
+					}
 				}
 			}
 			if(packet.packetType.equals("TA.PJump"))

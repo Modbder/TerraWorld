@@ -71,17 +71,24 @@ public class TAPlayerTracker{
 		return iarts;
 	}
 	
-	public void loadInventoryFromFile(File file,InventoryArtifacts iarts)
+	public void loadInventoryFromFile(File file,InventoryArtifacts iarts) throws IOException
 	{
-		try {
-			FileInputStream stream = new FileInputStream(file);
+		FileInputStream stream = new FileInputStream(file);
+		try 
+		{
+			
 			NBTTagCompound compressedTag = CompressedStreamTools.readCompressed(stream);
 			if(iarts != null)
 				iarts.readFromNBT(compressedTag);
 			stream.close();
-		} catch (Exception e) {
+		} 
+		catch (Exception e) 
+		{
 			e.printStackTrace();
-			return;
+		}
+		finally
+		{
+			stream.close();
 		}
 	}
 
@@ -94,7 +101,17 @@ public class TAPlayerTracker{
 			
 			InventoryArtifacts ia = createInventoryFor(event.entityPlayer,username);
 			if(!event.entityPlayer.worldObj.isRemote)
-				loadInventoryFromFile(createFilesFor(playerNBTFile), ia);
+			{
+				try
+				{
+					loadInventoryFromFile(createFilesFor(playerNBTFile), ia);
+				}
+				catch(Exception e)
+				{
+					logger.fatal(" *File does not exists even after attempting to create it! Please, read the log above this message to find out, what went wrong! DO NOT report this message only, report the log ABOVE! Reporting THIS message and a crash AFTER it WILL BE IGNORED!!!");
+					e.printStackTrace();
+				}
+			}
 	}
 
 	@SubscribeEvent

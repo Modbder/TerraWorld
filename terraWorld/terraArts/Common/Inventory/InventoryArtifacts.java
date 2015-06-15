@@ -75,6 +75,7 @@ public class InventoryArtifacts implements IInventory
 	@Override
     public ItemStack decrStackSize(int par1, int par2)
     {
+		 this.markDirty();
 	        if (this.mainInventory[par1] != null)
 	        {
 	            ItemStack itemstack;
@@ -105,6 +106,7 @@ public class InventoryArtifacts implements IInventory
 
 	@Override
 	public ItemStack getStackInSlotOnClosing(int i) {
+		this.markDirty();
         if (this.mainInventory[i] != null)
         {
             ItemStack itemstack = this.mainInventory[i];
@@ -115,6 +117,7 @@ public class InventoryArtifacts implements IInventory
         {
             return null;
         }
+        
 	}
 
 	@Override
@@ -124,6 +127,7 @@ public class InventoryArtifacts implements IInventory
 	        {
 	        	itemstack.stackSize = this.getInventoryStackLimit();
 	        }
+	        this.markDirty();
 	}
 
 	@Override

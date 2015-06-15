@@ -9,6 +9,7 @@ import DummyCore.Utils.DummyData;
 import DummyCore.Utils.MiscUtils;
 import net.minecraft.entity.EntityLivingBase;
 import net.minecraft.item.ItemArmor;
+import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.util.DamageSource;
@@ -74,7 +75,10 @@ public class BT_Utils {
 	
 	public static boolean isItemBuffable(ItemStack stk)
 	{
-		return stk != null && stk.getItem().isItemTool(stk);
+		boolean enable = false;
+		if(!enable)
+			enable = isTConstructTool(stk);
+		return (stk != null && stk.getItem() != null && !(stk.getItem() instanceof ItemBlock) && stk.getItem().isItemTool(stk)) || enable;
 	}
 	
 	public static boolean itemHasEffect(ItemStack stack)
@@ -90,6 +94,19 @@ public class BT_Utils {
 		return false;
 	}
 	
+	public static boolean isTConstructTool(ItemStack stk)
+	{
+		if(stk == null || stk.getItem() == null)return false;
+		try
+		{
+			Class clazz = Class.forName("tconstruct.library.tools.ToolCore");
+			Class toolClazz = stk.getItem().getClass();
+			return clazz.isAssignableFrom(toolClazz);
+		}catch(Exception e)
+		{
+			return false;
+		}
+	}
 
 
 }

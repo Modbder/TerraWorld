@@ -25,6 +25,29 @@ public class TAUtils {
 	
 	public static InventoryArtifacts clientInventory;
 	
+	public static void jumpTagUpdate(ItemStack par1ItemStack, EntityPlayer p)
+	{
+		if(par1ItemStack != null)
+		{
+			NBTTagCompound tag = MiscUtils.getStackTag(par1ItemStack);
+			if(!tag.hasKey("TAdata"))
+			{
+				tag.setString("TAdata", "||jump:0");
+			}
+			String dataString = tag.getString("TAdata");
+			DummyData[] dat = DataStorage.parseData(dataString);
+			if(dat.length > 0)
+			{
+				int jumped = (int) Double.parseDouble(dat[0].fieldValue);
+				if(p.onGround)
+					jumped = 0;
+				DummyData jDat = new DummyData("jump",jumped);
+				tag.setString("TAdata", jDat.toString());
+				par1ItemStack.setTagCompound(tag);
+			}
+		}
+	}
+	
 	public static void applySpeedModifier(EntityPlayer p, String uuidLast5Symbols, double modifier, boolean remove)
 	{
 		if(p.getAttributeMap().getAttributeInstanceByName("generic.movementSpeed").getModifier(UUID.fromString("CB3F55A3-645C-4F38-C497-9C13A33"+uuidLast5Symbols)) == null)
@@ -101,22 +124,43 @@ public class TAUtils {
 	
 	public static void onPlayerHoldJump(EntityPlayer p)
 	{
-		if(TAUtils.playerInvTable.containsKey(p.getCommandSenderName()))
+		if(!p.worldObj.isRemote)
 		{
-			InventoryArtifacts ia = (InventoryArtifacts) TAUtils.playerInvTable.get(p.getCommandSenderName());
-			for(int i = 0; i < 5; ++i)
+			if(TAUtils.playerInvTable.containsKey(p.getCommandSenderName()))
 			{
-				ItemStack stack = ia.mainInventory[i];
-				if(stack != null && stack.getItem() instanceof IArtifact)
+				InventoryArtifacts ia = (InventoryArtifacts) TAUtils.playerInvTable.get(p.getCommandSenderName());
+				for(int i = 0; i < 5; ++i)
 				{
-					IArtifact art = (IArtifact) stack.getItem();
-					NBTTagCompound tag = MiscUtils.getStackTag(stack);
-					if(art.holdJump(stack, p))
+					ItemStack stack = ia.mainInventory[i];
+					if(stack != null && stack.getItem() instanceof IArtifact)
 					{
-						break;
+						IArtifact art = (IArtifact) stack.getItem();
+						NBTTagCompound tag = MiscUtils.getStackTag(stack);
+						if(art.holdJump(stack, p))
+						{
+							break;
+						}
 					}
 				}
 			}
-		}
+	}
+			else
+			{
+				InventoryArtifacts ia = TAUtils.clientInventory;
+				if(ia != null)
+					for(int i = 0; i < 5; ++i)
+					{
+						ItemStack stack = ia.mainInventory[i];
+						if(stack != null && stack.getItem() instanceof IArtifact)
+						{
+							IArtifact art = (IArtifact) stack.getItem();
+							NBTTagCompound tag = MiscUtils.getStackTag(stack);
+							if(art.holdJump(stack, p))
+							{
+								break;
+							}
+						}
+					}
+			}
 	}
 }

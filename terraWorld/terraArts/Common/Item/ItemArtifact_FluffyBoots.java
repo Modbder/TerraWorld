@@ -36,15 +36,15 @@ public class ItemArtifact_FluffyBoots extends ItemArtifact{
 		if(par1ItemStack != null)
 		{
 			NBTTagCompound tag = MiscUtils.getStackTag(par1ItemStack);
-			if(!tag.hasKey("data"))
+			if(!tag.hasKey("TAdata"))
 			{
-				tag.setString("data", "||jump:100");
+				tag.setString("TAdata", "||jump:100");
 			}
-			String dataString = tag.getString("data");
+			String dataString = tag.getString("TAdata");
 			DummyData[] dat = DataStorage.parseData(dataString);
 			if(dat.length > 1)
 			{
-				int jumped = Integer.parseInt(dat[1].fieldValue);
+				int jumped = (int) Double.parseDouble(dat[1].fieldValue);
 				if(jumped > 0)
 				{
 					p.motionY += 0.08F;
@@ -56,12 +56,12 @@ public class ItemArtifact_FluffyBoots extends ItemArtifact{
 					jumped -= 1;
 				}
 				ret = jumped > 0 && !p.onGround;
-				int jumped1 = Integer.parseInt(dat[0].fieldValue);
+				int jumped1 = (int) Double.parseDouble(dat[0].fieldValue);
 				DummyData jDat = new DummyData("jump",jumped);
 				DummyData jDat1 = new DummyData("sprint",jumped1);
 				DataStorage.addDataToString(jDat1);
 				DataStorage.addDataToString(jDat);
-				tag.setString("data", DataStorage.getDataString());
+				tag.setString("TAdata", DataStorage.getDataString());
 					par1ItemStack.setTagCompound(tag);
 			}
 		}
@@ -73,15 +73,15 @@ public class ItemArtifact_FluffyBoots extends ItemArtifact{
 		if(par1ItemStack != null)
 		{
 			NBTTagCompound tag = MiscUtils.getStackTag(par1ItemStack);
-			if(!tag.hasKey("data"))
+			if(!tag.hasKey("TAdata"))
 			{
-				tag.setString("data", "||sprint:0||jump:0");
+				tag.setString("TAdata", "||sprint:0||jump:0");
 			}
 			String dataString = tag.getString("data");
 			DummyData[] dat = DataStorage.parseData(dataString);
 			if(dat.length > 1)
 			{
-				int jumped = Integer.parseInt(dat[0].fieldValue);
+				int jumped = (int) Double.parseDouble(dat[0].fieldValue);
 				if(jumped > 50)
 				{
 					if(!p.isSprinting())
@@ -105,14 +105,14 @@ public class ItemArtifact_FluffyBoots extends ItemArtifact{
 					}
 					TAUtils.applySpeedModifier(p, getSpeedModifierName(par1ItemStack), getSpeedModifierValue(par1ItemStack), true);
 				}
-				int jumped1 = Integer.parseInt(dat[1].fieldValue);
+				int jumped1 = (int)Double.parseDouble(dat[1].fieldValue);
 				if(p.onGround)
 					jumped1 = (int) (1.6*20);
 				DummyData jDat = new DummyData("jump",jumped1);
 				DummyData jDat1 = new DummyData("sprint",jumped);
 				DataStorage.addDataToString(jDat1);
 				DataStorage.addDataToString(jDat);
-				tag.setString("data", DataStorage.getDataString());
+				tag.setString("TAdata", DataStorage.getDataString());
 				par1ItemStack.setTagCompound(tag);
 			}
 		}

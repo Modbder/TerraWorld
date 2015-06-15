@@ -23,8 +23,12 @@ public class ItemArtifact_MoonStone extends ItemArtifact{
 		if(!p.worldObj.isDaytime())
 		{
 			p.addPotionEffect(new PotionEffect(Potion.damageBoost.id,10,0,true));
-			p.addPotionEffect(new PotionEffect(Potion.field_76444_x.id,100,0,true));
 		}
+	}
+	
+	@Override
+	public float setDamage(ItemStack par1ItemStack, EntityPlayer p, float am) {
+		return p.worldObj.isDaytime() ? am : am/1.5F;
 	}
 
 }

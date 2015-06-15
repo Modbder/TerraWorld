@@ -26,5 +26,10 @@ public class ItemArtifact_SunStone extends ItemArtifact{
 			p.addPotionEffect(new PotionEffect(Potion.field_76444_x.id,100,0,true));
 		}
 	}
+	
+	@Override
+	public float setDamage(ItemStack par1ItemStack, EntityPlayer p, float am) {
+		return p.worldObj.isDaytime() ? am/1.5F : am;
+	}
 
 }

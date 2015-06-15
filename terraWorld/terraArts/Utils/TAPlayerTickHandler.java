@@ -39,7 +39,10 @@ public class TAPlayerTickHandler{
 		{
 			if(event.phase == Phase.START)
 			{
-				
+				if(TAUtils.playerInvTable.containsKey(event.player.getCommandSenderName()) && event.player.ticksExisted % 20 == 0)
+				{
+					TAUtils.playerInvTable.get(event.player.getCommandSenderName()).markDirty();
+				}
 			}
 		}
 	}

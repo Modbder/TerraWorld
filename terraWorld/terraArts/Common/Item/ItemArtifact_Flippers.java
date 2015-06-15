@@ -31,7 +31,7 @@ public class ItemArtifact_Flippers extends ItemArtifact{
 	
 	@Override
 	public void onArtUpdate(ItemStack par1ItemStack, EntityPlayer p) {
-		Block b = MiscUtils.getBlock(p.worldObj, (int)p.posX, (int)p.posY, (int)p.posZ);
+		Block b = p.worldObj.getBlock((int)p.posX, (int)p.posY, (int)p.posZ);
 		if(b != null && b.getMaterial() == Material.water)
 		{
 			TAUtils.applySpeedModifier(p, getSpeedModifierName(par1ItemStack), getSpeedModifierValue(par1ItemStack), false);

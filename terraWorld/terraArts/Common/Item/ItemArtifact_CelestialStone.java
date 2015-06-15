@@ -21,7 +21,11 @@ public class ItemArtifact_CelestialStone extends ItemArtifact{
 	@Override
 	public void onArtUpdate(ItemStack par1ItemStack, EntityPlayer p) {
 			p.addPotionEffect(new PotionEffect(Potion.damageBoost.id,10,0,true));
-			p.addPotionEffect(new PotionEffect(Potion.field_76444_x.id,100,0,true));
+	}
+	
+	@Override
+	public float setDamage(ItemStack par1ItemStack, EntityPlayer p, float am) {
+		return am/1.5F;
 	}
 
 }

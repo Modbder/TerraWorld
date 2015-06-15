@@ -50,13 +50,14 @@ public class TAWorldGen implements IWorldGenerator{
 				{
 					if(TAConfig.showGenerationInformation)
 						Notifier.notifyDebugCustomMod("TerraArts", x+"|"+y+"|"+z+"|"+rarity+"|"+floatRarity);
-					for(int dx = -1; dx <= 1; ++dx)
-					{
-						for(int dz = -1; dz <= 1; ++dz)
+					if(TAConfig.chestsGeneratePlatform)
+						for(int dx = -1; dx <= 1; ++dx)
 						{
-							world.setBlock(x+dx, y, z+dz, Blocks.planks,0,3);
+							for(int dz = -1; dz <= 1; ++dz)
+							{
+								world.setBlock(x+dx, y, z+dz, Blocks.planks,0,3);
+							}
 						}
-					}
 					world.setBlock(x, y+1, z, BlockRegistry.chests[rarity],random.nextInt(4),2);
 					TileEntityTAChest chest = (TileEntityTAChest) world.getTileEntity(x, y+1, z);
 					if(chest == null)
@@ -72,11 +73,13 @@ public class TAWorldGen implements IWorldGenerator{
                     ChestGenHooks info = ChestGenHooks.getInfo(ChestGenHooks.DUNGEON_CHEST);
                     WeightedRandomChestContent.generateChestContents(random, info.getItems(random), chest, info.getCount(random));
 					chest.setInventorySlotContents(0, artStack);
-					if(rarity < 4 && random.nextFloat() < 0.4F)
+					if(rarity < 4 && random.nextFloat() < TAConfig.keyChance)
 					{
 						ItemStack keyStack = new ItemStack(ItemRegistry.key,1,rarity+1);
 						chest.setInventorySlotContents(1, keyStack);
 					}
+					chest.initChest();
+					chest.onPlaced();
 				}
 			}
 		}
